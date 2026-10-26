@@ -10,8 +10,8 @@ screen to your phone, with nothing sent over the internet.
   achievement diary tasks. It reads them again a few seconds after they change, and whenever you open the panel.
 - It shows them in a side panel as a QR code, with your account name, quest points and the time they were read.
   After you log out, the panel keeps showing your last reading.
-- It also saves the same text to a file on your PC, one file per account (`<account name>.txt` in RuneLite's
-  `.runelite/plugin-data/bubbletoolsync` folder).
+- It also saves the same text to a file on your PC, one file per account (`account-<account name>.txt` in
+  RuneLite's `.runelite/plugin-data/bubbletoolsync` folder).
 
 It only reads your own account. It doesn't send anything anywhere, and it doesn't click or type anything for you.
 

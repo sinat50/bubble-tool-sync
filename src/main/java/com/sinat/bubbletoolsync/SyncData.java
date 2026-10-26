@@ -17,10 +17,27 @@ import net.runelite.api.gameval.VarbitID;
 
 /**
  * One reading of the player's progress (levels, quests, diary tasks), and the code that packs it into the
- * text the QR code holds: "BTS1:" followed by the bytes below in base64url.
+ * text the QR code holds: "BTS1:" followed by the bytes below in base64url (no padding).
  * <p>
- * The layout ("format version 1") is written out in CLAUDE.md. The phone app unpacks exactly this layout,
- * so any change here must be made in the app too, and needs a new format version.
+ * The layout, "format version 1". The phone app unpacks exactly this layout, so any change here must be made
+ * in the app too, and needs a new format version. "Big-endian" means the biggest byte first.
+ * <pre>
+ * Bytes      What
+ * 1          format version (1)
+ * 4          when it was read, seconds since 1970 (big-endian, unsigned)
+ * 1 + n      account name length in bytes, then the name in UTF-8 (non-breaking spaces turned into spaces)
+ * 1          account type (varbit IRONMAN: 0 normal, 1 ironman, 2 ultimate, 3 hardcore, 4 group, ...)
+ * 2          quest points (varp QP, big-endian, at most 65,535)
+ * 24         real skill levels, in the order of SKILLS (at most 255)
+ * 23 x 4     diary varps, in the order of DIARY_VARPS (big-endian)
+ * 39         Karamja diary varbits, in the order of KARAMJA_VARBITS (at most 255)
+ * varint     number of quests
+ * varints    RuneLite quest IDs, smallest first, each as the difference from the one before (the first from 0)
+ * ceil(n/4)  quest states, 2 bits each in the same order (0 not started, 1 started, 2 finished),
+ *            the first quest in the top two bits of the first byte
+ * </pre>
+ * Varint: 7 bits per byte, lowest bits first; the top bit set means "more follows".
+ * SyncDataTest checks every part of this against examples worked out by hand.
  */
 @Getter
 @AllArgsConstructor

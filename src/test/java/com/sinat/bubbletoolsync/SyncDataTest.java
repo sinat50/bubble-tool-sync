@@ -12,7 +12,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Checks that readings pack into exactly the bytes of format version 1 (see the table in CLAUDE.md), using
+ * Checks that readings pack into exactly the bytes of format version 1 (see the table in SyncData), using
  * examples worked out by hand. The phone app reads these same bytes, so if one of these tests fails after a
  * change, the app would read the QR code wrongly too.
  */
@@ -225,7 +225,7 @@ public class SyncDataTest
 		assertEquals(Skill.RUNECRAFT, SyncData.SKILLS[20]);
 		assertEquals(Skill.SAILING, SyncData.SKILLS[23]);
 
-		// The game's varp numbers, in the order of the table in CLAUDE.md (Ardougne, Desert, Falador, Fremennik,
+		// The game's varp numbers, in the format's order (Ardougne, Desert, Falador, Fremennik,
 		// Kandarin, Kourend, Lumbridge & Draynor, Morytania, Varrock, Western, Wilderness, then Karamja elite).
 		assertArrayEquals(new int[]{
 			1196, 1197, 1198, 1199, 1186, 1187, 1184, 1185, 1178, 1179, 2085, 2086,

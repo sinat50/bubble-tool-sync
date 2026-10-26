@@ -2,6 +2,7 @@ package com.sinat.bubbletoolsync;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.util.concurrent.ScheduledExecutorService;
@@ -161,9 +162,9 @@ public class BubbleToolSyncPlugin extends Plugin
 		{
 			return;
 		}
-		lastShown = data;
-
 		String text = data.toText();
+		// Only remembered once it has packed without a problem.
+		lastShown = data;
 
 		// The panel belongs to Swing's thread, so hand the reading over to it.
 		SyncPanel currentPanel = panel;
@@ -176,7 +177,17 @@ public class BubbleToolSyncPlugin extends Plugin
 	}
 
 	/**
-	 * Saves the QR code's text to "account name.txt" in the plugin's folder, on the background worker.
+	 * The saved file's name for an account: "account-" + name + ".txt". The "account-" part matters: Windows
+	 * reserves some names (Con, Aux, Nul, Prn, Com1, Lpt1, ...) that are also valid player names, and RuneLite
+	 * refuses to make a file called, say, "Con.txt".
+	 */
+	static String fileNameFor(String accountName)
+	{
+		return "account-" + accountName + ".txt";
+	}
+
+	/**
+	 * Saves the QR code's text to {@link #fileNameFor} in the plugin's folder, on the background worker.
 	 * It's written to a temporary file first and then swapped in, so the file is never left half-written.
 	 */
 	private void save(String accountName, String text)
@@ -188,14 +199,23 @@ public class BubbleToolSyncPlugin extends Plugin
 			{
 				Filepath folder = getPluginDirectory();
 				folder.createDirectories();
-				Filepath file = folder.joinSegment(accountName + ".txt");
+				Filepath file = folder.joinSegment(fileNameFor(accountName));
 				temp = folder.createTempFile("saving", ".tmp");
 				temp.write(text);
-				temp.moveTo(file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+				try
+				{
+					temp.moveTo(file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+				}
+				catch (AtomicMoveNotSupportedException e)
+				{
+					// Rare: this drive can't swap in one step, so do a normal replace instead.
+					temp.moveTo(file, StandardCopyOption.REPLACE_EXISTING);
+				}
 			}
 			catch (IOException | IllegalArgumentException e)
 			{
-				log.warn("Couldn't save the reading for {}", accountName, e);
+				// The account name is left out on purpose: players often share their log when asking for help.
+				log.warn("Couldn't save the reading", e);
 			}
 			finally
 			{
