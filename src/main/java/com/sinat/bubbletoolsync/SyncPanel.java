@@ -8,24 +8,32 @@ import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ScheduledExecutorService;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.PluginPanel;
+import net.runelite.client.util.Filepath;
 
 /**
- * The side panel: the account name, when it was read, the QR code, and a "Copy text" button.
+ * The side panel: the account name, when it was read, the QR code, and "Copy text" and "Export file" buttons.
  * Everything here runs on Swing's thread (the "EDT"), never the game's.
  */
+@Slf4j
 class SyncPanel extends PluginPanel
 {
 	private static final DateTimeFormatter READ_AT_FORMAT =
@@ -34,25 +42,32 @@ class SyncPanel extends PluginPanel
 	private static final int SIDE_GAP = 6;
 
 	private final Runnable onOpen;
+	/** RuneLite's background worker, for writing exported files without freezing the panel. */
+	private final ScheduledExecutorService executor;
 
 	private final JLabel nameLabel = new JLabel();
 	private final JLabel questPointsLabel = new JLabel();
 	private final JLabel readAtLabel = new JLabel();
 	private final QrView qrView = new QrView();
 	private final JButton copyButton = new JButton("Copy text");
+	private final JButton exportButton = new JButton("Export file");
 	private final JLabel messageLabel = new JLabel();
 
 	/** The text in the QR code right now, or null if there isn't one yet. */
 	private String text;
+	/** The account the text belongs to, for the exported file's suggested name. */
+	private String accountName;
 
 	/**
-	 * @param onOpen what to do each time the player opens this panel (the plugin reads the game again)
+	 * @param onOpen   what to do each time the player opens this panel (the plugin reads the game again)
+	 * @param executor RuneLite's background worker, used to write exported files
 	 */
-	SyncPanel(Runnable onOpen)
+	SyncPanel(Runnable onOpen, ScheduledExecutorService executor)
 	{
 		// false: no scroll bar, so the QR code can use the panel's full width.
 		super(false);
 		this.onOpen = onOpen;
+		this.executor = executor;
 
 		setLayout(new BorderLayout());
 		setBorder(new EmptyBorder(SIDE_GAP, SIDE_GAP, SIDE_GAP, SIDE_GAP));
@@ -85,9 +100,19 @@ class SyncPanel extends PluginPanel
 		copyButton.setToolTipText("Copies the text inside the QR code");
 		copyButton.addActionListener(e -> copyText());
 
+		exportButton.setFocusable(false);
+		exportButton.setToolTipText("Saves the text inside the QR code to a file, in a folder you choose");
+		exportButton.addActionListener(e -> exportFile());
+
+		// The two buttons side by side.
+		JPanel buttons = new JPanel(new GridLayout(1, 2, 6, 0));
+		buttons.setOpaque(false);
+		buttons.add(copyButton);
+		buttons.add(exportButton);
+
 		JPanel bottom = new JPanel(new BorderLayout(0, 6));
 		bottom.setOpaque(false);
-		bottom.add(copyButton, BorderLayout.NORTH);
+		bottom.add(buttons, BorderLayout.NORTH);
 		bottom.add(messageLabel, BorderLayout.SOUTH);
 
 		// Everything stacked at the top of the panel.
@@ -108,6 +133,7 @@ class SyncPanel extends PluginPanel
 	 */
 	void showData(SyncData data, String newText)
 	{
+		accountName = data.getAccountName();
 		QrCode qr;
 		try
 		{
@@ -121,6 +147,7 @@ class SyncPanel extends PluginPanel
 			showMessage("Couldn't make the QR code. Use Copy text instead.");
 			text = newText;
 			copyButton.setEnabled(true);
+			exportButton.setEnabled(true);
 			return;
 		}
 
@@ -131,6 +158,7 @@ class SyncPanel extends PluginPanel
 			Instant.ofEpochSecond(data.getReadAt()).atZone(ZoneId.systemDefault())));
 		qrView.setQr(qr);
 		copyButton.setEnabled(true);
+		exportButton.setEnabled(true);
 		messageLabel.setText("Scan with Bubble Tool on your phone");
 	}
 
@@ -138,11 +166,13 @@ class SyncPanel extends PluginPanel
 	void showNothing()
 	{
 		text = null;
+		accountName = null;
 		nameLabel.setText(" ");
 		questPointsLabel.setText(" ");
 		readAtLabel.setText(" ");
 		qrView.setQr(null);
 		copyButton.setEnabled(false);
+		exportButton.setEnabled(false);
 		messageLabel.setText("Log in to the game to see your QR code");
 	}
 
@@ -159,6 +189,65 @@ class SyncPanel extends PluginPanel
 			Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text), null);
 			messageLabel.setText("Copied");
 		}
+	}
+
+	/**
+	 * Asks where to save, then writes the same text as the QR code to that file (UTF-8, one line, no line break
+	 * at the end), for the Bubble Tool app to import.
+	 */
+	private void exportFile()
+	{
+		if (text == null)
+		{
+			return;
+		}
+		// Keep the text as it is now, in case a new reading arrives while the dialog is open.
+		String exportText = text;
+
+		// RuneLite's own file chooser (Plugin Hub plugins must use it instead of Java's JFileChooser).
+		Filepath.Chooser chooser = new Filepath.Chooser()
+			.setIsSave()
+			.setAcceptsFiles()
+			.setDialogTitle("Export for Bubble Tool")
+			.addExtensionFilter("Text file (*.txt)", "txt")
+			.setDefaultExtension("txt")
+			.setFileName(BubbleToolSyncPlugin.fileNameFor(accountName));
+		List<Filepath> chosen = chooser.showDialog(this);
+		if (chosen == null || chosen.isEmpty())
+		{
+			// The player cancelled.
+			return;
+		}
+		Filepath file = chosen.get(0);
+
+		if (file.exists())
+		{
+			int answer = JOptionPane.showConfirmDialog(this,
+				file.getFileName() + " already exists. Replace it?", "Export for Bubble Tool",
+				JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+			if (answer != JOptionPane.YES_OPTION)
+			{
+				return;
+			}
+		}
+
+		messageLabel.setText("Exporting...");
+		executor.execute(() ->
+		{
+			String result;
+			try
+			{
+				file.write(exportText);
+				result = "Exported " + file.getFileName();
+			}
+			catch (IOException e)
+			{
+				log.warn("Couldn't export the file", e);
+				result = "Couldn't export the file";
+			}
+			String message = result;
+			SwingUtilities.invokeLater(() -> messageLabel.setText(message));
+		});
 	}
 
 	@Override

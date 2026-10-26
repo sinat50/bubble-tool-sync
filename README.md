@@ -22,10 +22,12 @@ It only reads your own account. It doesn't send anything anywhere, and it doesn'
 3. Open the Bubble Tool Sync panel from RuneLite's side bar.
 4. In the OSRS Bubble Tool app on your phone, choose **Scan from RuneLite** and point the camera at the QR code.
 
-If the code won't scan, make it bigger by widening the side panel, turn up your screen's brightness, or move the
-phone a little closer or further away.
+If the code won't scan, turn up your screen's brightness, or move the phone a little closer or further away.
 
-The **Copy text** button copies the same text that's in the QR code, if you'd rather move it some other way.
+Other ways to move it:
+- **Export file** saves the same text that's in the QR code to a file, in a folder you choose (for example one
+  that syncs to your phone). Then import that file in the app.
+- **Copy text** copies the same text to the clipboard.
 
 ## Credits
 

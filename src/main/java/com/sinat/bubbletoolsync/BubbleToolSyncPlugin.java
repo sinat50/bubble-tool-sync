@@ -71,7 +71,7 @@ public class BubbleToolSyncPlugin extends Plugin
 	@Override
 	protected void startUp()
 	{
-		panel = new SyncPanel(this::readSoon);
+		panel = new SyncPanel(this::readSoon, executor);
 
 		BufferedImage icon = ImageUtil.loadImageResource(getClass(), "panel_icon.png");
 		navButton = NavigationButton.builder()
