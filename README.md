@@ -1,5 +1,7 @@
 # Bubble Tool Sync
 
+<img src="docs/icon.png" alt="Bubble Tool icon" width="96">
+
 A RuneLite plugin for the **OSRS Bubble Tool** Android app. It shows your quests, skill levels and achievement
 diary tasks as a QR code, and the app scans it with your phone's camera. Your progress goes straight from your
 screen to your phone, with nothing sent over the internet.
@@ -51,6 +53,8 @@ Other ways to move it:
 
 - Which game values hold which achievement diary tasks comes from
   [Quest Helper](https://github.com/Zoinkwiz/quest-helper) by Zoinkwiz and its contributors (BSD 2-Clause License).
+
+- The icon is the OSRS Bubble Tool app's own icon, by sinat50.
 
 ## Licence
 
