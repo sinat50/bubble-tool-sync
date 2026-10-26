@@ -1,0 +1,17 @@
+.gradle
+build
+.idea/
+.project
+.settings/
+.classpath
+nbactions.xml
+nb-configuration.xml
+nbproject/
+*.class
+out/
+
+# AI assistant files (kept on this computer only)
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+.claude/

@@ -1,0 +1,54 @@
+# Bubble Tool Sync
+
+A RuneLite plugin for the **OSRS Bubble Tool** Android app. It shows your quests, skill levels and achievement
+diary tasks as a QR code, and the app scans it with your phone's camera. Your progress goes straight from your
+screen to your phone, with nothing sent over the internet.
+
+## What it does
+
+- While you're logged in, it reads your own account's quests, skill levels, account type and achievement diary
+  tasks. It reads them again when they change.
+- It shows them in a side panel as a QR code, with your account name and the time they were read.
+- It saves the same text to a file on your PC (one file per account), so the panel still has something to show
+  after you log out.
+
+It only reads your own account. It doesn't send anything anywhere, and it doesn't click or type anything for you.
+
+## How to use it
+
+1. Install **Bubble Tool Sync** from the Plugin Hub in RuneLite.
+2. Log in to the game.
+3. Open the Bubble Tool Sync panel from RuneLite's side bar.
+4. In the OSRS Bubble Tool app on your phone, choose **Scan from RuneLite** and point the camera at the QR code.
+
+If the code won't scan, make it bigger by widening the side panel, turn up your screen's brightness, or move the
+phone a little closer or further away.
+
+The **Copy text** button copies the same text that's in the QR code, if you'd rather move it some other way.
+
+## Credits
+
+- QR codes are made with Project Nayuki's
+  [QR Code generator library](https://www.nayuki.io/page/qr-code-generator-library), used under the MIT License:
+
+  > Copyright (c) Project Nayuki. (MIT License)
+  >
+  > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+  > documentation files (the "Software"), to deal in the Software without restriction, including without
+  > limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+  > Software, and to permit persons to whom the Software is furnished to do so, subject to the following
+  > conditions:
+  > - The above copyright notice and this permission notice shall be included in all copies or substantial
+  >   portions of the Software.
+  > - The Software is provided "as is", without warranty of any kind, express or implied, including but not
+  >   limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no
+  >   event shall the authors or copyright holders be liable for any claim, damages or other liability, whether
+  >   in an action of contract, tort or otherwise, arising from, out of or in connection with the Software or the
+  >   use or other dealings in the Software.
+
+- Which game values hold which achievement diary tasks comes from
+  [Quest Helper](https://github.com/Zoinkwiz/quest-helper) by Zoinkwiz and its contributors (BSD 2-Clause License).
+
+## Licence
+
+BSD 2-Clause. See [LICENSE](LICENSE).
