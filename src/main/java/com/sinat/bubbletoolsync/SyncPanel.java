@@ -101,10 +101,13 @@ class SyncPanel extends PluginPanel
 		showNothing();
 	}
 
-	/** Shows a new reading. */
-	void showData(SyncData data)
+	/**
+	 * Shows a new reading.
+	 *
+	 * @param newText the reading packed as text ({@link SyncData#toText()})
+	 */
+	void showData(SyncData data, String newText)
 	{
-		String newText = data.toText();
 		QrCode qr;
 		try
 		{

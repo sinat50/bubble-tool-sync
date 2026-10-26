@@ -2,6 +2,7 @@ package com.sinat.bubbletoolsync;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Map;
 import java.util.TreeMap;
@@ -169,6 +170,23 @@ public final class SyncData
 
 		return new SyncData(nowSeconds, name, client.getVarbitValue(VarbitID.IRONMAN),
 			client.getVarpValue(VarPlayerID.QP), levels, varps, karamja, questIds, questStates);
+	}
+
+	/**
+	 * True if the other reading has exactly the same progress as this one: everything except when it was read.
+	 * Used to skip showing and saving a reading when nothing has really changed.
+	 */
+	boolean hasSameProgressAs(SyncData other)
+	{
+		return other != null
+			&& accountName.equals(other.accountName)
+			&& accountType == other.accountType
+			&& questPoints == other.questPoints
+			&& Arrays.equals(skillLevels, other.skillLevels)
+			&& Arrays.equals(diaryVarps, other.diaryVarps)
+			&& Arrays.equals(karamjaVarbits, other.karamjaVarbits)
+			&& Arrays.equals(questIds, other.questIds)
+			&& Arrays.equals(questStates, other.questStates);
 	}
 
 	/** Packs this reading into bytes, in the layout described at the top. */
