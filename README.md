@@ -13,7 +13,7 @@ screen to your phone, with nothing sent over the internet.
 - It shows them in a side panel as a QR code, with your account name, quest points and the time they were read.
   After you log out, the panel keeps showing your last reading.
 - It also saves the same text to a file on your PC, one file per account (`account-<account name>.txt` in
-  RuneLite's `.runelite/plugin-data/bubbletoolsync` folder).
+  RuneLite's `.runelite/plugin-data/bubble-tool-sync` folder).
 
 It only reads your own account. It doesn't send anything anywhere, and it doesn't click or type anything for you.
 

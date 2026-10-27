@@ -33,8 +33,9 @@ import net.runelite.client.util.ImageUtil;
 	name = "Bubble Tool Sync",
 	description = "Shows your quests, levels and diary tasks as a QR code for the OSRS Bubble Tool phone app",
 	tags = {"bubble", "phone", "mobile", "qr", "quests", "diaries", "sync"},
-	// Needed to save files through RuneLite's Filepath (the folder is .runelite/plugin-data/bubbletoolsync).
-	internalName = "bubbletoolsync"
+	// Needed to save files through RuneLite's Filepath (the folder is .runelite/plugin-data/bubble-tool-sync).
+	// The Plugin Hub requires it to match the plugin's file name in the plugin-hub repo: plugins/bubble-tool-sync.
+	internalName = "bubble-tool-sync"
 )
 public class BubbleToolSyncPlugin extends Plugin
 {
