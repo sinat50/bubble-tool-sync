@@ -26,12 +26,12 @@ import net.runelite.client.util.ImageUtil;
 
 /**
  * Reads the player's own quests, levels and achievement diary tasks, and shows them in a side panel as a QR code
- * for the OSRS Bubble Tool phone app to scan. Each new reading is also saved to a file, one per account.
+ * for the Old School Bubble Tool phone app to scan. Each new reading is also saved to a file, one per account.
  */
 @Slf4j
 @PluginDescriptor(
 	name = "Bubble Tool Sync",
-	description = "Shows your quests, levels and diary tasks as a QR code for the OSRS Bubble Tool phone app",
+	description = "Shows your quests, levels and diary tasks as a QR code for the Old School Bubble Tool phone app",
 	tags = {"bubble", "phone", "mobile", "qr", "quests", "diaries", "sync"},
 	// Needed to save files through RuneLite's Filepath (the folder is .runelite/plugin-data/bubble-tool-sync).
 	// The Plugin Hub requires it to match the plugin's file name in the plugin-hub repo: plugins/bubble-tool-sync.
